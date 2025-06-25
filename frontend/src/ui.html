@@ -1,0 +1,1589 @@
+<!-- developed by sivasai -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LearnPath - Your Journey to Mastery</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-gradient-light: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --primary-gradient-dark: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
+            --accent-color-light: #6366f1; /* indigo-500 */
+            --accent-color-dark: #2dd4bf; /* teal-400 */
+            --text-color-light: #1f2937;
+            --text-color-dark: #e2e8f0;
+            --bg-light: #ffffff;
+            --bg-dark: #1e293b;
+            --card-bg-light: rgba(255, 255, 255, 0.95);
+            --card-bg-dark: rgba(45, 55, 72, 0.95);
+            --border-light: rgba(255, 255, 255, 0.2);
+            --border-dark: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--primary-gradient-light);
+            transition: all 0.5s ease; /* Smoother transition for theme changes */
+            color: var(--text-color-light);
+        }
+        body.dark {
+            background: var(--primary-gradient-dark);
+            color: var(--text-color-dark);
+        }
+        
+        /* Animated Background from test (2).html */
+        .animated-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 0;
+        }
+        .floating-shape {
+            position: absolute;
+            opacity: 0.15; /* Slightly more visible */
+            animation: float 20s infinite ease-in-out;
+            border-radius: 50%; /* Default to circle, overridden by inline style */
+            filter: blur(2px); /* Soften shapes */
+        }
+        .floating-shape:nth-child(1) { animation-delay: 0s; background-color: #a78bfa; }
+        .floating-shape:nth-child(2) { animation-delay: 4s; background-color: #6366f1; }
+        .floating-shape:nth-child(3) { animation-delay: 8s; background-color: #8b5cf6; }
+        .floating-shape:nth-child(4) { animation-delay: 12s; background-color: #a78bfa; }
+        .floating-shape:nth-child(5) { animation-delay: 16s; background-color: #6366f1; }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            33% { transform: translateY(-30px) rotate(120deg); }
+            66% { transform: translateY(30px) rotate(240deg); }
+        }
+        
+        /* Navbar Enhancements */
+        .navbar {
+            transition: all 0.4s ease;
+            background: var(--card-bg-light);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-light);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); /* Subtle initial shadow */
+        }
+        .dark .navbar {
+            background: var(--card-bg-dark);
+            border-bottom: 1px solid var(--border-dark);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        .navbar:hover {
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        .dark .navbar:hover {
+            box-shadow: 0 8px 32px rgba(255, 255, 255, 0.15);
+        }
+        
+        /* Enhanced Navigation Links */
+        .nav-link {
+            position: relative;
+            padding: 8px 16px;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        .nav-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 25px;
+            opacity: 0;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            z-index: -1;
+        }
+        .nav-link:hover::before {
+            opacity: 1;
+            transform: scale(1.05);
+        }
+        .nav-link:hover {
+            color: white !important;
+            transform: translateY(-2px);
+        }
+        /* Active/current link style */
+        .nav-link.active {
+            color: white !important;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            box-shadow: 0 4px 10px rgba(102, 126, 234, 0.4);
+        }
+        .dark .nav-link {
+            color: #e2e8f0;
+        }
+        .dark .nav-link:hover {
+            color: white !important;
+        }
+
+        /* Hero Section Enhancements */
+        .hero-section {
+            position: relative;
+            background: var(--primary-gradient-light);
+            overflow: hidden;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+        }
+        .dark .hero-section {
+            background: var(--primary-gradient-dark);
+        }
+        .hero-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.2); /* Softer overlay */
+            z-index: 1;
+        }
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            padding: 2rem 1.5rem; /* Ensure good padding on smaller screens */
+        }
+        .hero-content h1 {
+            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Text shadow for pop */
+        }
+        .hero-content p {
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Text shadow for pop */
+        }
+        
+        /* Particle Animation */
+        .particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none; /* Ensure particles don't block interaction */
+        }
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.6); /* Brighter particles */
+            border-radius: 50%;
+            animation: particle-float 15s infinite linear;
+        }
+        @keyframes particle-float {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
+        }
+        
+        /* Enhanced Cards */
+        .card {
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            background: var(--card-bg-light);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-light);
+            position: relative;
+            overflow: hidden;
+            border-radius: 1.25rem; /* Slightly larger radius for softer look */
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08); /* More subtle initial shadow */
+        }
+        .dark .card {
+            background: var(--card-bg-dark);
+            border: 1px solid var(--border-dark);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        }
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+        .card:hover::before {
+            left: 100%;
+        }
+        .card:hover {
+            transform: translateY(-10px) scale(1.02); /* Less aggressive hover */
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15); /* Stronger hover shadow */
+        }
+        .dark .card:hover {
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5); /* Stronger hover shadow for dark mode */
+        }
+        
+        /* Button Enhancements */
+        .btn-primary {
+            position: relative;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border: none;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            letter-spacing: 0.025em; /* Slightly wider spacing */
+            transform: translateZ(0); /* For smoother animation */
+        }
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent); /* Brighter shimmer */
+            transition: left 0.5s ease;
+        }
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+        .btn-primary:hover {
+            transform: translateY(-4px); /* More pronounced lift */
+            box-shadow: 0 18px 40px rgba(102, 126, 234, 0.5); /* Stronger shadow */
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border: 2px solid white;
+            color: white;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+        .btn-secondary:hover {
+            background: white;
+            color: #667eea; /* Match primary gradient start color */
+            border-color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255, 255, 255, 0.2);
+        }
+        .dark .btn-secondary {
+            border-color: #cbd5e0; /* light gray for dark mode */
+            color: #cbd5e0;
+        }
+        .dark .btn-secondary:hover {
+            background: #cbd5e0;
+            color: #1a202c; /* Dark text on light hover */
+        }
+        
+        /* Image Enhancements */
+        .image-container {
+            position: relative;
+            overflow: hidden;
+            border-radius: 1.5rem; /* Larger border-radius */
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15); /* More pronounced shadow */
+        }
+        .image-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.7), rgba(118, 75, 162, 0.7)); /* Slightly more opaque overlay */
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            z-index: 1;
+        }
+        .image-container:hover::before {
+            opacity: 1;
+        }
+        .image-container img {
+            transition: transform 0.4s ease;
+        }
+        .image-container:hover img {
+            transform: scale(1.05); /* Slightly less aggressive zoom */
+        }
+        
+        /* Scroll Animations */
+        .fade-in-up {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.7s ease-out; /* Slower, smoother fade-in */
+        }
+        .fade-in-up.animate {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .animate-fade-in {
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+        }
+        .animate-fade-in.animate {
+            opacity: 1;
+        }
+        
+        /* Enhanced FAQ */
+        .faq-item {
+            transition: all 0.3s ease;
+            background: var(--card-bg-light);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-light);
+            border-radius: 1rem; /* Consistent border radius */
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05); /* Lighter shadow */
+        }
+        .dark .faq-item {
+            background: var(--card-bg-dark);
+            border: 1px solid var(--border-dark);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        .faq-item:hover {
+            transform: translateY(-5px); /* Lift slightly on hover */
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        .dark .faq-item:hover {
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        }
+        /* Existing ui.html styles for faq-answer and faq-toggle maintained */
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease-out; /* Smoother open/close */
+        }
+        .faq-answer.open { max-height: 200px; /* Adjust as needed or use scrollHeight */ }
+        .faq-toggle::after {
+            content: '▼';
+            display: inline-block;
+            margin-left: 8px;
+            transition: transform 0.3s ease;
+        }
+        .faq-toggle.open::after { transform: rotate(180deg); }
+
+        /* Stats Section from test (2).html */
+        .stats-counter {
+            font-size: 3rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Course Map Enhancements from test (2).html */
+        .coursemap-container {
+            background: var(--card-bg-light);
+            backdrop-filter: blur(20px);
+            border-radius: 1.5rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--border-light);
+        }
+        .dark .coursemap-container {
+            background: var(--card-bg-dark);
+            border: 1px solid var(--border-dark);
+        }
+
+        /* Existing ui.html styles below, with some modifications for consistency */
+        .dark .bg-white { background-color: var(--bg-dark) !important; }
+        .dark .bg-gray-50 { background-color: #2d3748 !important; }
+        .dark .text-gray-800 { color: var(--text-color-dark) !important; }
+        .dark .text-gray-600 { color: #94a3b8 !important; }
+        .dark .text-indigo-600 { color: var(--accent-color-dark) !important; }
+        .dark .border { border-color: #475569 !important; }
+        
+        .modal { transition: opacity 0.3s ease; z-index: 1000; }
+        .modal-content, .sign-in-modal-content {
+            position: relative;
+            background: var(--bg-light);
+            padding: 2rem; /* Increased padding */
+            border-radius: 0.75rem; /* Larger border-radius */
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.25); /* Stronger shadow */
+            max-width: 28rem;
+            width: 90%; /* Responsive width */
+        }
+        .dark .modal-content, .dark .sign-in-modal-content {
+            background: var(--bg-dark);
+        }
+        .close-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            font-size: 1.75rem; /* Larger icon */
+            cursor: pointer;
+            color: #6b7280;
+            transition: color 0.3s ease, transform 0.2s ease;
+        }
+        .dark .close-btn {
+            color: #cbd5e0;
+        }
+        .close-btn:hover { color: #1f2937; transform: rotate(90deg); }
+        .dark .close-btn:hover { color: #f0f9ff; }
+        .cancel-btn {
+            padding: 0.75rem 1.5rem; /* Larger padding */
+            background: #e5e7eb;
+            color: #374151; /* Darker text */
+            border: none;
+            border-radius: 0.5rem; /* Consistent radius */
+            cursor: pointer;
+            transition: background 0.3s ease, color 0.3s ease;
+            font-weight: 500;
+        }
+        .dark .cancel-btn {
+            background: #475569;
+            color: #e2e8f0;
+            border: 1px solid #64748b;
+        }
+        .cancel-btn:hover {
+            background: #d1d5db;
+        }
+        .dark .cancel-btn:hover {
+            background: #64748b;
+            color: #ffffff;
+        }
+        .social-btn {
+            transition: background 0.3s ease, transform 0.2s ease;
+            padding: 0.75rem; /* Larger buttons */
+            border: 1px solid #d1d5db;
+            border-radius: 50%;
+            display: inline-flex; /* For centering icon */
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+        .dark .social-btn {
+            border-color: #4a5568;
+            background: #2d3748;
+        }
+        .social-btn:hover { background: #f3f4f6; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); }
+        .dark .social-btn:hover { background: #4a5568; }
+        .social-btn img {
+            width: 1.5rem; /* Slightly larger icons */
+            height: 1.5rem;
+        }
+        .error-message {
+            color: #ef4444;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+            display: none;
+        }
+        input {
+            color: var(--text-color-light);
+            background: #ffffff;
+            border: 1px solid #d1d5db;
+            transition: all 0.3s ease;
+        }
+        .dark input {
+            color: var(--text-color-dark);
+            background: #2d3748;
+            border: 1px solid #4a5568;
+        }
+        input:focus {
+            outline: none;
+            border-color: #6366f1; /* Accent color on focus */
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2); /* Focus ring */
+        }
+        .dark input:focus {
+            border-color: var(--accent-color-dark);
+            box-shadow: 0 0 0 3px rgba(45, 212, 191, 0.2);
+        }
+        .dark input[type="password"] {
+            -webkit-text-security: disc; /* Use disc for better visibility while typing */
+            -moz-text-security: disc;
+            text-security: disc;
+            color: var(--text-color-dark);
+        }
+        .dark label {
+            color: var(--text-color-dark);
+        }
+        .profile-pic {
+            width: 2.75rem; /* Slightly larger */
+            height: 2.75rem;
+            border-radius: 50%;
+            object-fit: cover;
+            cursor: pointer;
+            border: 3px solid var(--accent-color-light); /* Accent border */
+            transition: all 0.3s ease;
+        }
+        .dark .profile-pic {
+            border-color: var(--accent-color-dark);
+        }
+        .profile-pic:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 0 5px rgba(99, 102, 241, 0.3); /* Glow on hover */
+        }
+        .dark .profile-pic:hover {
+            box-shadow: 0 0 0 5px rgba(45, 212, 191, 0.3);
+        }
+        .dropdown {
+            position: absolute;
+            top: 4rem; /* Adjusted for larger pic */
+            right: 1.5rem;
+            background: var(--bg-light);
+            border-radius: 0.5rem;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2); /* Stronger dropdown shadow */
+            min-width: 14rem; /* Wider dropdown */
+            z-index: 1000;
+            overflow: hidden; /* For rounded corners */
+        }
+        .dark .dropdown { background: #334155; }
+        .dropdown-item {
+            padding: 0.85rem 1.25rem; /* More padding */
+            cursor: pointer;
+            transition: background 0.2s ease;
+            color: var(--text-color-light);
+            font-weight: 500;
+        }
+        .dark .dropdown-item { color: var(--text-color-dark); }
+        .dropdown-item:hover { background: #f0f4f8; }
+        .dark .dropdown-item:hover { background: #475569; }
+
+        .default-profile-pic {
+            background: linear-gradient(135deg, #4b5563, #9ca3af);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            font-weight: bold;
+            border: 3px solid #4b5563;
+        }
+        .dark .default-profile-pic {
+            background: linear-gradient(135deg, #475569, #1e293b);
+            color: #ffffff;
+            border: 3px solid #e2e8f0;
+        }
+        .streak-logo {
+            width: 2rem; /* Larger */
+            height: 2rem;
+            background: var(--accent-color-light); /* Accent color background */
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: white; /* White text on accent */
+            font-size: 0.875rem;
+            margin-left: 0.75rem; /* More spacing */
+            cursor: pointer;
+            position: relative;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            transition: all 0.2s ease;
+        }
+        .dark .streak-logo {
+            background: var(--accent-color-dark);
+            color: #1a202c; /* Dark text for contrast in dark mode */
+        }
+        .streak-logo:hover {
+            transform: scale(1.1) translateY(-2px);
+            box-shadow: 0 5px 15px rgba(99, 102, 241, 0.4);
+        }
+        .dark .streak-logo:hover {
+            box-shadow: 0 5px 15px rgba(45, 212, 191, 0.4);
+        }
+        .streak-popup {
+            display: none;
+            position: absolute;
+            bottom: -2.8rem; /* Adjusted position */
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg-light);
+            color: var(--text-color-light);
+            padding: 0.35rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            white-space: nowrap;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+            z-index: 1001;
+        }
+        .dark .streak-popup {
+            background: #1e293b;
+            color: #e2e8f0;
+        }
+        .streak-logo:hover .streak-popup {
+            display: block;
+        }
+        .course-input {
+            width: 100%;
+            padding: 0.75rem; /* Larger input */
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem; /* Consistent radius */
+            margin-bottom: 1rem; /* More spacing */
+            font-size: 1rem;
+        }
+        .dark .course-input {
+            background: #2d3748;
+            border-color: #4a5568;
+            color: #e2e8f0;
+        }
+        .testimonial-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            background: var(--bg-light);
+            border-radius: 1.25rem; /* Consistent border radius */
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08); /* Initial shadow */
+            padding: 2rem; /* Consistent padding */
+        }
+        .dark .testimonial-card { background: #334155; }
+        .testimonial-card:hover {
+            transform: translateY(-8px); /* Lift slightly less */
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15); /* Stronger shadow on hover */
+        }
+        .dark .testimonial-card:hover {
+            box-shadow: 0 15px 30px rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+    <div class="animated-bg">
+        <div class="floating-shape" style="top: 10%; left: 15%; width: 80px; height: 80px;"></div>
+        <div class="floating-shape" style="top: 30%; left: 80%; width: 120px; height: 120px; border-radius: 20%;"></div>
+        <div class="floating-shape" style="top: 70%; left: 30%; width: 100px; height: 100px; border-radius: 60%;"></div>
+        <div class="floating-shape" style="top: 50%; left: 5%; width: 60px; height: 60px;"></div>
+        <div class="floating-shape" style="top: 85%; left: 90%; width: 90px; height: 90px; border-radius: 70%;"></div>
+    </div>
+    <div class="particles"></div>
+
+    <nav class="navbar sticky top-0 z-50 py-4 px-6">
+        <div class="container mx-auto flex flex-wrap justify-between items-center">
+            <div class="text-3xl font-bold text-indigo-600 dark:text-teal-400">LearnPath</div>
+            <div class="flex items-center space-x-4 md:space-x-8 mt-2 md:mt-0">
+                <a href="#home" class="nav-link text-gray-800 dark:text-e2e8f0 font-medium active">Home</a>
+                <a href="#features" class="nav-link text-gray-800 dark:text-e2e8f0 font-medium">Features</a>
+                <a href="#about" class="nav-link text-gray-800 dark:text-e2e8f0 font-medium">About</a>
+                <div id="auth-section" class="flex items-center space-x-4">
+                    <a href="#sign-in" id="sign-in-link" class="nav-link text-gray-800 dark:text-e2e8f0 font-medium" onclick="showSignInModal(event)">Sign In</a>
+                    <div id="profile-section" class="relative hidden">
+                        <div class="flex items-center space-x-2">
+                            <img id="profile-pic" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234b5563' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' class='feather feather-user'%3E%3Cpath d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'%3E%3C/path%3E%3Ccircle cx='12' cy='7' r='4'%3E%3C/circle%3E%3C/svg%3E" alt="Profile Picture" class="profile-pic" onclick="toggleDropdown()">
+                            <div id="streak-logo" class="streak-logo hidden">
+                                <span>🔥0</span>
+                                <span class="streak-popup" id="streak-popup">Login Streak: 0 days</span>
+                            </div>
+                        </div>
+                        <div id="dropdown" class="dropdown hidden">
+                            <div class="dropdown-item" onclick="showProfileModal()">My Profile</div>
+                            <div class="dropdown-item" onclick="viewProgress()">View Progress</div>
+                            <div class="dropdown-item" onclick="signOut()">Sign Out</div>
+                        </div>
+                    </div>
+                </div>
+                <a href="#try" id="try-link" class="nav-link text-gray-800 dark:text-e2e8f0 font-medium">Try LearnPath Now</a>
+                <button id="themeToggle" class="focus:outline-none ml-2 md:ml-4">
+                    <svg id="themeIcon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-7 h-7 text-gray-800 dark:text-e2e8f0">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <section id="home" class="hero-section text-white text-center flex items-center justify-center relative z-10 py-24">
+        <div class="hero-overlay"></div>
+        <div class="container mx-auto px-6 hero-content">
+            <h1 class="text-5xl md:text-6xl font-extrabold leading-tight mb-6 fade-in-up">
+                Unlock Your Potential with <span class="bg-clip-text text-transparent bg-gradient-to-r from-teal-200 to-cyan-400">Personalized Learning</span>
+            </h1>
+            <p class="text-xl md:text-2xl mb-10 text-gray-200 fade-in-up" style="animation-delay: 0.2s;">
+                Discover a tailored learning experience designed to unlock your full potential with AI-powered personalization.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center fade-in-up" style="animation-delay: 0.4s;">
+                <button class="btn-primary text-white px-8 py-4 rounded-full text-lg font-medium shadow-lg hover:shadow-xl" onclick="showCreateAccountModal()">
+                    Get Started
+                </button>
+                <button class="btn-secondary px-8 py-4 rounded-full text-lg font-medium hover:shadow-xl" onclick="document.getElementById('features').scrollIntoView({ behavior: 'smooth' });">
+                    Learn More
+                </button>
+            </div>
+            <div class="relative mt-16 fade-in-up" style="animation-delay: 0.6s;">
+                <div class="image-container">
+                    <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                         alt="Students collaborating"
+                         class="w-full h-96 object-cover rounded-3xl shadow-2xl">
+                </div>
+                <div class="absolute -bottom-6 -right-6 bg-white p-4 rounded-xl shadow-lg dark:bg-gray-700 dark:text-gray-200">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                        <span class="text-sm font-medium text-gray-800 dark:text-gray-200">50,000+ Active Learners</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="features" class="py-24 bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-200">
+        <div class="container mx-auto px-6">
+            <h2 class="text-4xl font-extrabold text-center mb-16 animate-fade-in">Key Features</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
+                <div class="feature-card card p-8 text-center flex flex-col items-center shadow-lg">
+                    <div class="bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 rounded-full p-4 mb-6">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-10 h-10">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h4c0 1.657 1.343 3 3 3s3-1.343 3-3V10c0-1.657-1.343-3-3-3s-3 1.343-3 3V17zM18 10h1.5a2.25 2.25 0 012.25 2.25v.75m1.5 0l-.678-.678A4.5 4.5 0 0016.5 10H14.25m-1.5 0h.008v.008H12.75V10z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4">AI-Powered Personalized Paths</h3>
+                    <p class="text-gray-600 dark:text-gray-400 leading-relaxed">Our advanced AI creates unique learning paths tailored to your strengths, weaknesses, and goals.</p>
+                </div>
+                <div class="feature-card card p-8 text-center flex flex-col items-center shadow-lg" style="animation-delay: 0.2s;">
+                    <div class="bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-300 rounded-full p-4 mb-6">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-10 h-10">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4">Interactive & Engaging Content</h3>
+                    <p class="text-gray-600 dark:text-gray-400 leading-relaxed">Learn through gamified modules, quizzes, and hands-on projects designed to keep you engaged.</p>
+                </div>
+                <div class="feature-card card p-8 text-center flex flex-col items-center shadow-lg" style="animation-delay: 0.4s;">
+                    <div class="bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-300 rounded-full p-4 mb-6">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-10 h-10">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9V3m-9 9a9 9 0 009 9m-9-9a9 9 0 019-9m-9 9H3m9 9V3"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4">Real-time Progress Tracking</h3>
+                    <p class="text-gray-600 dark:text-gray-400 leading-relaxed">Monitor your growth with detailed analytics and receive actionable insights to stay on track.</p>
+                </div>
+                <div class="feature-card card p-8 text-center flex flex-col items-center shadow-lg" style="animation-delay: 0.6s;">
+                    <div class="bg-yellow-100 dark:bg-yellow-900 text-yellow-600 dark:text-yellow-300 rounded-full p-4 mb-6">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-10 h-10">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c1.657 0 3 .895 3 2s-1.343 2-3 2-3-.895-3-2 1.343-2 3-2zM12 21a9 9 0 100-18 9 9 0 000 18z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4">Expert-Curated Content</h3>
+                    <p class="text-gray-600 dark:text-gray-400 leading-relaxed">Access high-quality learning materials developed by industry experts and educators.</p>
+                </div>
+                <div class="feature-card card p-8 text-center flex flex-col items-center shadow-lg" style="animation-delay: 0.8s;">
+                    <div class="bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 rounded-full p-4 mb-6">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-10 h-10">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.105A9.952 9.952 0 013 12C3 7.582 7.03 4 12 4s9 3.582 9 8z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4">Community Support & Mentorship</h3>
+                    <p class="text-gray-600 dark:text-gray-400 leading-relaxed">Connect with peers and mentors in a thriving community, fostering collaboration and growth.</p>
+                </div>
+                <div class="feature-card card p-8 text-center flex flex-col items-center shadow-lg" style="animation-delay: 1s;">
+                    <div class="bg-red-100 dark:bg-red-900 text-red-600 dark:text-red-300 rounded-full p-4 mb-6">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-10 h-10">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5 5.223 5 3.375 5.922 2.221 7.5a3.001 3.001 0 003.755 4.332m9.593-9.593A13.004 13.004 0 0112 21c2.277 0 4.125-.922 5.279-2.5a3.001 3.001 0 00-3.755-4.332L12 6.253z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4">Flexible Learning Schedule</h3>
+                    <p class="text-gray-600 dark:text-gray-400 leading-relaxed">Learn at your own pace, anytime, anywhere, with access across all your devices.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="about" class="py-24 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200">
+        <div class="container mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-12">
+            <div class="md:w-1/2 animate-fade-in">
+                <h2 class="text-4xl font-extrabold mb-6">About LearnPath</h2>
+                <p class="text-lg text-gray-600 dark:text-gray-400 mb-6 leading-relaxed">
+                    LearnPath is dedicated to revolutionizing education through personalized, AI-driven learning experiences.
+                    We believe that everyone deserves a unique path to mastery, tailored to their individual needs and aspirations.
+                    Our platform combines cutting-edge technology with expert-curated content to provide an engaging and effective learning journey.
+                </p>
+                <p class="text-lg text-gray-600 dark:text-gray-400 leading-relaxed">
+                    Join thousands of learners who are already transforming their potential into achievement with LearnPath.
+                    Your journey to mastery starts here.
+                </p>
+            </div>
+            <div class="md:w-1/2 relative flex justify-center animate-fade-in" style="animation-delay: 0.2s;">
+                <div class="image-container">
+                    <img src="https://images.unsplash.com/photo-1517048676732-d65bc937f952?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                         alt="Team collaboration"
+                         class="rounded-3xl shadow-2xl w-full h-96 object-cover">
+                </div>
+                <div class="absolute -bottom-6 -left-6 bg-white p-4 rounded-xl shadow-lg dark:bg-gray-700 dark:text-gray-200">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-3 h-3 bg-blue-500 rounded-full animate-pulse"></div>
+                        <span class="text-sm font-medium text-gray-800 dark:text-gray-200">Innovation at Core</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="testimonials" class="py-24 bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-200">
+        <div class="container mx-auto px-6">
+            <h2 class="text-4xl font-extrabold text-center mb-16 animate-fade-in">What Our Learners Say</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="testimonial-card card p-8 shadow-lg text-center" style="animation-delay: 0.2s;">
+                    <p class="text-lg italic mb-6">"LearnPath transformed my understanding of complex topics. The personalized approach kept me motivated and engaged!"</p>
+                    <div class="flex flex-col items-center">
+                        <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="John Doe" class="w-16 h-16 rounded-full object-cover mb-3 border-4 border-indigo-300 dark:border-teal-300">
+                        <p class="font-semibold text-lg">John Doe</p>
+                        <p class="text-gray-600 dark:text-gray-400">Software Engineer</p>
+                    </div>
+                </div>
+                <div class="testimonial-card card p-8 shadow-lg text-center" style="animation-delay: 0.4s;">
+                    <p class="text-lg italic mb-6">"The interactive lessons and real-time progress tracking made learning enjoyable and effective. Highly recommend!"</p>
+                    <div class="flex flex-col items-center">
+                        <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Jane Smith" class="w-16 h-16 rounded-full object-cover mb-3 border-4 border-indigo-300 dark:border-teal-300">
+                        <p class="font-semibold text-lg">Jane Smith</p>
+                        <p class="text-gray-600 dark:text-gray-400">Student</p>
+                    </div>
+                </div>
+                <div class="testimonial-card card p-8 shadow-lg text-center" style="animation-delay: 0.6s;">
+                    <p class="text-lg italic mb-6">"As an educator, I'm impressed by the depth and quality of content. LearnPath is truly a game-changer for online education."</p>
+                    <div class="flex flex-col items-center">
+                        <img src="https://randomuser.me/api/portraits/men/47.jpg" alt="David Lee" class="w-16 h-16 rounded-full object-cover mb-3 border-4 border-indigo-300 dark:border-teal-300">
+                        <p class="font-semibold text-lg">David Lee</p>
+                        <p class="text-gray-600 dark:text-gray-400">Educator</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="faq" class="py-24 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200">
+        <div class="container mx-auto px-6">
+            <h2 class="text-4xl font-extrabold text-center mb-16 animate-fade-in">Frequently Asked Questions</h2>
+            <div class="max-w-3xl mx-auto space-y-6">
+                <div class="faq-item card p-6 cursor-pointer" onclick="toggleFaq('faq1')">
+                    <div class="flex justify-between items-center faq-toggle" id="faq1-toggle">
+                        <h3 class="text-xl font-semibold">How does LearnPath personalize my learning?</h3>
+                        <span class="text-indigo-600 dark:text-teal-400 text-2xl"></span>
+                    </div>
+                    <div class="faq-answer mt-4 text-gray-600 dark:text-gray-400" id="faq1-answer">
+                        <p>Our AI assesses your initial knowledge, learning style, and goals through a series of questions and adaptive tests. It then continuously adjusts your path based on your progress and performance.</p>
+                    </div>
+                </div>
+                <div class="faq-item card p-6 cursor-pointer" onclick="toggleFaq('faq2')">
+                    <div class="flex justify-between items-center faq-toggle" id="faq2-toggle">
+                        <h3 class="text-xl font-semibold">What kind of courses are available?</h3>
+                        <span class="text-indigo-600 dark:text-teal-400 text-2xl"></span>
+                    </div>
+                    <div class="faq-answer mt-4 text-gray-600 dark:text-gray-400" id="faq2-answer">
+                        <p>LearnPath offers a wide range of courses across various domains including technology, arts, sciences, business, and personal development. We are constantly expanding our library.</p>
+                    </div>
+                </div>
+                <div class="faq-item card p-6 cursor-pointer" onclick="toggleFaq('faq3')">
+                    <div class="flex justify-between items-center faq-toggle" id="faq3-toggle">
+                        <h3 class="text-xl font-semibold">Is there a mobile app?</h3>
+                        <span class="text-indigo-600 dark:text-teal-400 text-2xl"></span>
+                    </div>
+                    <div class="faq-answer mt-4 text-gray-600 dark:text-gray-400" id="faq3-answer">
+                        <p>Yes, LearnPath is fully responsive and accessible on all devices, including smartphones and tablets, through your web browser. A dedicated mobile app is currently under development.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="roadmap" class="py-24 bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-200">
+        <div class="container mx-auto px-6">
+            <h2 class="text-4xl font-extrabold text-center mb-16 animate-fade-in">Our Roadmap & Vision</h2>
+            <div class="relative after:absolute after:inset-y-0 after:w-1 after:bg-indigo-200 after:left-1/2 after:-translate-x-1/2 dark:after:bg-teal-700">
+                <div class="grid grid-cols-1 md:grid-cols-2 items-center gap-8 md:gap-16 mb-12 animate-fade-in">
+                    <div class="md:text-right relative">
+                        <div class="p-6 card rounded-lg shadow-lg">
+                            <h3 class="text-2xl font-bold text-indigo-600 dark:text-teal-400 mb-2">Q4 2023: AI Personalization Alpha</h3>
+                            <p class="text-gray-600 dark:text-gray-400">Launch of our core AI personalization engine to a limited group of early adopters for testing and feedback.</p>
+                        </div>
+                        <div class="absolute top-1/2 right-0 w-8 h-8 bg-indigo-600 rounded-full flex items-center justify-center -mr-4 transform -translate-y-1/2 dark:bg-teal-400 hidden md:flex">
+                            <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                        </div>
+                    </div>
+                    <div class="hidden md:block"></div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 items-center gap-8 md:gap-16 mb-12 animate-fade-in" style="animation-delay: 0.2s;">
+                    <div class="hidden md:block"></div>
+                    <div class="relative">
+                        <div class="p-6 card rounded-lg shadow-lg">
+                            <h3 class="text-2xl font-bold text-indigo-600 dark:text-teal-400 mb-2">Q1 2024: Content Expansion & Gamification</h3>
+                            <p class="text-gray-600 dark:text-gray-400">Integration of new interactive content modules and introduction of gamified learning elements to enhance engagement.</p>
+                        </div>
+                        <div class="absolute top-1/2 left-0 w-8 h-8 bg-indigo-600 rounded-full flex items-center justify-center -ml-4 transform -translate-y-1/2 dark:bg-teal-400 hidden md:flex">
+                            <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                        </div>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 items-center gap-8 md:gap-16 mb-12 animate-fade-in" style="animation-delay: 0.4s;">
+                    <div class="md:text-right relative">
+                        <div class="p-6 card rounded-lg shadow-lg">
+                            <h3 class="text-2xl font-bold text-indigo-600 dark:text-teal-400 mb-2">Q2 2024: Community Features & Mentorship</h3>
+                            <p class="text-gray-600 dark:text-gray-400">Launch of peer-to-peer discussion forums and integration with a mentorship program for advanced learners.</p>
+                        </div>
+                        <div class="absolute top-1/2 right-0 w-8 h-8 bg-indigo-600 rounded-full flex items-center justify-center -mr-4 transform -translate-y-1/2 dark:bg-teal-400 hidden md:flex">
+                            <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                        </div>
+                    </div>
+                    <div class="hidden md:block"></div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 items-center gap-8 md:gap-16 animate-fade-in" style="animation-delay: 0.6s;">
+                    <div class="hidden md:block"></div>
+                    <div class="relative">
+                        <div class="p-6 card rounded-lg shadow-lg">
+                            <h3 class="text-2xl font-bold text-indigo-600 dark:text-teal-400 mb-2">Q3 2024: Mobile App & Offline Access</h3>
+                            <p class="text-gray-600 dark:text-gray-400">Release of dedicated mobile applications for iOS and Android, along with features for offline content access.</p>
+                        </div>
+                        <div class="absolute top-1/2 left-0 w-8 h-8 bg-indigo-600 rounded-full flex items-center justify-center -ml-4 transform -translate-y-1/2 dark:bg-teal-400 hidden md:flex">
+                            <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="try" class="py-24 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 text-center">
+        <div class="container mx-auto px-6">
+            <h2 class="text-4xl font-extrabold mb-6 animate-fade-in">Ready to Start Your Learning Journey?</h2>
+            <p class="text-xl text-gray-600 dark:text-gray-400 mb-10 animate-fade-in" style="animation-delay: 0.2s;">
+                Sign up for free and experience the future of personalized education.
+            </p>
+            <button class="btn-primary text-white px-10 py-5 rounded-full text-xl font-medium shadow-lg hover:shadow-xl animate-fade-in"
+                    style="animation-delay: 0.4s;" onclick="showCreateAccountModal()">
+                Get Started for Free
+            </button>
+        </div>
+    </section>
+
+    <footer class="bg-gray-800 text-white py-12 px-6">
+        <div class="container mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div>
+                <h3 class="text-2xl font-bold mb-4">LearnPath</h3>
+                <p class="text-gray-400">Your Journey to Mastery</p>
+            </div>
+            <div>
+                <h3 class="text-xl font-semibold mb-4">Quick Links</h3>
+                <ul class="space-y-2">
+                    <li><a href="#home" class="hover:text-indigo-400 transition duration-300">Home</a></li>
+                    <li><a href="#features" class="hover:text-indigo-400 transition duration-300">Features</a></li>
+                    <li><a href="#about" class="hover:text-indigo-400 transition duration-300">About</a></li>
+                    <li><a href="#faq" class="hover:text-indigo-400 transition duration-300">FAQ</a></li>
+                </ul>
+            </div>
+            <div>
+                <h3 class="text-xl font-semibold mb-4">Contact Us</h3>
+                <p class="text-gray-400">Email: support@learnpath.com</p>
+                <p class="text-gray-400">Phone: +1 (123) 456-7890</p>
+                <div class="flex space-x-4 mt-4">
+                    <a href="#" class="text-gray-400 hover:text-indigo-400 transition duration-300">
+                        <svg fill="currentColor" class="w-6 h-6" viewBox="0 0 24 24"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.879V14.62H8.053v-2.618h2.385V9.782c0-2.364 1.443-3.65 3.543-3.65 1.052 0 1.961.078 2.229.113v2.43h-1.442c-1.137 0-1.357.54-1.357 1.332v1.73H17.5l-.273 2.618h-2.174V22.001C18.343 21.128 22 16.991 22 12 22 6.477 17.523 2 12 2z"></path></svg>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-indigo-400 transition duration-300">
+                        <svg fill="currentColor" class="w-6 h-6" viewBox="0 0 24 24"><path d="M22.46 6c-.8.36-1.64.6-2.5.7.9-.54 1.5-1.4 1.8-2.4-.8.48-1.7.8-2.6.98-.8-.88-2.1-1.44-3.5-1.44-2.64 0-4.78 2.15-4.78 4.8 0 .38.04.75.12 1.1-.34-.02-.68-.04-1.02-.04-3.6 0-6.8 1.9-8.9 4.6-1.04 1.78-1.64 3.86-1.64 6.08 0 1.6.24 3.12.7 4.5-.7-.18-1.38-.4-2.04-.66.86 2.05 2.56 3.56 4.54 4.14-1.6.1-3.26.16-4.9.16-.32 0-.64-.02-.96-.06 2.1 1.34 4.6 2.14 7.3 2.14 8.7 0 13.43-7.22 13.43-13.43 0-.2-.0-.4-.02-.6.92-.66 1.7-1.48 2.32-2.42z"></path></svg>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-indigo-400 transition duration-300">
+                        <svg fill="currentColor" class="w-6 h-6" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07c3.252.148 4.779 1.637 4.938 4.938.058 1.265.07 1.645.07 4.85s-.012 3.584-.07 4.85c-.148 3.252-1.637 4.779-4.938 4.938-1.265.058-1.645.07-4.85.07s-3.584-.012-4.85-.07c-3.252-.148-4.779-1.637-4.938-4.938-.058-1.265-.07-1.645-.07-4.85s.012-3.584.07-4.85c.148-3.252 1.637-4.779 4.938-4.938 1.265-.058 1.645-.07 4.85-.07zm0 2.138c-3.257 0-3.666.014-4.945.072-2.723.124-3.832 1.185-3.956 3.956-.058 1.279-.072 1.688-.072 4.945s.014 3.666.072 4.945c.124 2.723 1.185 3.832 3.956 3.956 1.279.058 1.688.072 4.945.072s3.666-.014 4.945-.072c2.723-.124 3.832-1.185 3.956-3.956.058-1.279.072-1.688.072-4.945s-.014-3.666-.072-4.945c-.124-2.723-1.185-3.832-3.956-3.956-1.279-.058-1.688-.072-4.945-.072zm0 6a3 3 0 100 6 3 3 0 000-6zm0 2.138a.862.862 0 110 1.724.862.862 0 010-1.724zM16.942 5.568a1.237 1.237 0 100 2.474 1.237 1.237 0 000-2.474z"></path></svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="text-center text-gray-500 mt-8">
+            &copy; 2025 LearnPath Made with ❤️ by Students for students . All rights reserved.
+        </div>
+    </footer>
+
+    <div id="createAccountModal" class="modal fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center hidden">
+        <div class="modal-content bg-white p-8 rounded-lg shadow-xl relative dark:bg-gray-800 dark:text-gray-200">
+            <button class="close-btn" onclick="hideCreateAccountModal()">&times;</button>
+            <h2 class="text-3xl font-bold mb-6 text-center text-indigo-600 dark:text-teal-400">Create Account</h2>
+            <form id="createAccountForm" class="space-y-4">
+                <div>
+                    <label for="username" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Username</label>
+                    <input type="text" id="username" name="username" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200">
+                    <p id="usernameError" class="error-message">Username is required.</p>
+                </div>
+                <div>
+                    <label for="createEmail" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
+                    <input type="email" id="createEmail" name="createEmail" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200">
+                    <p id="createEmailError" class="error-message">A valid email is required.</p>
+                </div>
+                <div>
+                    <label for="createPassword" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Password</label>
+                    <input type="password" id="createPassword" name="createPassword" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200">
+                    <p id="createPasswordError" class="error-message">Password must be at least 8 characters long and include a number and a special character.</p>
+                </div>
+                <div>
+                    <label for="confirmPassword" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Confirm Password</label>
+                    <input type="password" id="confirmPassword" name="confirmPassword" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200">
+                    <p id="confirmPasswordError" class="error-message">Passwords do not match.</p>
+                </div>
+                <button type="submit" class="btn-primary w-full text-white px-4 py-2 rounded-md font-semibold shadow-md hover:shadow-lg">Create Account</button>
+            </form>
+            <p class="text-center text-gray-600 dark:text-gray-400 mt-4">Or sign up with:</p>
+            <div class="flex justify-center space-x-4 mt-4">
+                <button class="social-btn" onclick="signInWithGoogle()">
+                    <img src="https://img.icons8.com/color/48/000000/google-logo.png" alt="Google">
+                </button>
+                <button class="social-btn" onclick="signInWithFacebook()">
+                    <img src="https://img.icons8.com/color/48/000000/facebook-new.png" alt="Facebook">
+                </button>
+                <button class="social-btn" onclick="signInWithGithub()">
+                    <img src="https://img.icons8.com/color/48/000000/github--v1.png" alt="GitHub">
+                </button>
+            </div>
+            <p class="text-center text-gray-600 dark:text-gray-400 mt-4">
+                Already have an account? <a href="#" class="text-indigo-600 dark:text-teal-400 hover:underline" onclick="showSignInModalAndHideCreate(event)">Sign In</a>
+            </p>
+        </div>
+    </div>
+
+    <div id="signInModal" class="modal fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center hidden">
+        <div class="sign-in-modal-content bg-white p-8 rounded-lg shadow-xl relative dark:bg-gray-800 dark:text-gray-200">
+            <button class="close-btn" onclick="hideSignInModal()">&times;</button>
+            <h2 class="text-3xl font-bold mb-6 text-center text-indigo-600 dark:text-teal-400">Sign In</h2>
+            <form id="signInForm" class="space-y-4">
+                <div>
+                    <label for="signInEmail" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
+                    <input type="email" id="signInEmail" name="signInEmail" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200">
+                    <p id="signInEmailError" class="error-message">Please enter your email.</p>
+                </div>
+                <div>
+                    <label for="signInPassword" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Password</label>
+                    <input type="password" id="signInPassword" name="signInPassword" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200">
+                    <p id="signInPasswordError" class="error-message">Please enter your password.</p>
+                </div>
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input id="rememberMe" name="rememberMe" type="checkbox" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded dark:text-teal-400 dark:border-gray-600 dark:bg-gray-700">
+                        <label for="rememberMe" class="ml-2 block text-sm text-gray-900 dark:text-gray-300">
+                            Remember me
+                        </label>
+                    </div>
+                    <a href="#" class="text-sm text-indigo-600 dark:text-teal-400 hover:underline">Forgot your password?</a>
+                </div>
+                <button type="submit" class="btn-primary w-full text-white px-4 py-2 rounded-md font-semibold shadow-md hover:shadow-lg">Sign In</button>
+            </form>
+            <p class="text-center text-gray-600 dark:text-gray-400 mt-4">Or sign in with:</p>
+            <div class="flex justify-center space-x-4 mt-4">
+                <button class="social-btn" onclick="signInWithGoogle()">
+                    <img src="https://img.icons8.com/color/48/000000/google-logo.png" alt="Google">
+                </button>
+                <button class="social-btn" onclick="signInWithFacebook()">
+                    <img src="https://img.icons8.com/color/48/000000/facebook-new.png" alt="Facebook">
+                </button>
+                <button class="social-btn" onclick="signInWithGithub()">
+                    <img src="https://img.icons8.com/color/48/000000/github--v1.png" alt="GitHub">
+                </button>
+            </div>
+            <p class="text-center text-gray-600 dark:text-gray-400 mt-4">
+                Don't have an account? <a href="#" class="text-indigo-600 dark:text-teal-400 hover:underline" onclick="showCreateAccountModalAndHideSignIn(event)">Create Account</a>
+            </p>
+        </div>
+    </div>
+
+    <div id="profileModal" class="modal fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center hidden">
+        <div class="modal-content bg-white p-8 rounded-lg shadow-xl relative dark:bg-gray-800 dark:text-gray-200">
+            <button class="close-btn" onclick="hideProfileModal()">&times;</button>
+            <h2 class="text-3xl font-bold mb-6 text-center text-indigo-600 dark:text-teal-400">My Profile</h2>
+            <div class="flex flex-col items-center mb-6">
+                <img id="profileModalPic" src="" alt="Profile Picture" class="w-32 h-32 rounded-full object-cover mb-4 border-4 border-indigo-300 dark:border-teal-300">
+                <input type="file" id="profilePicInput" class="hidden" accept="image/*" onchange="handleProfilePicUpload(event)">
+                <div id="profilePicButtons" class="flex flex-col space-y-2 mt-2">
+                    </div>
+            </div>
+            <form id="profileForm" class="space-y-4">
+                <div>
+                    <label for="profileUsername" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Username</label>
+                    <input type="text" id="profileUsername" name="profileUsername" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200">
+                </div>
+                <div>
+                    <label for="profileEmail" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
+                    <input type="email" id="profileEmail" name="profileEmail" readonly class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-100 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-400">
+                </div>
+                <div class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+                    <h3 class="text-xl font-bold mb-4 text-indigo-600 dark:text-teal-400">Edit Password</h3>
+                    <div>
+                        <label for="currentPassword" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Current Password</label>
+                        <input type="password" id="currentPassword" name="currentPassword" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200">
+                    </div>
+                    <div>
+                        <label for="newPassword" class="block text-sm font-medium text-gray-700 dark:text-gray-300">New Password</label>
+                        <input type="password" id="newPassword" name="newPassword" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200">
+                        <p id="newPasswordError" class="error-message">Password must be at least 8 characters long and include a number and a special character.</p>
+                    </div>
+                    <div>
+                        <label for="confirmNewPassword" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Confirm New Password</label>
+                        <input type="password" id="confirmNewPassword" name="confirmNewPassword" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200">
+                        <p id="confirmNewPasswordError" class="error-message">Passwords do not match.</p>
+                    </div>
+                    <button type="button" onclick="updatePassword()" class="btn-primary w-full text-white px-4 py-2 rounded-md font-semibold shadow-md hover:shadow-lg mt-4">Update Password</button>
+                </div>
+                
+                <div class="flex justify-end space-x-4 mt-6">
+                    <button type="button" onclick="hideProfileModal()" class="cancel-btn">Cancel</button>
+                    <button type="submit" class="btn-primary text-white px-4 py-2 rounded-md font-semibold shadow-md hover:shadow-lg">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+        // Theme Toggle
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+        const htmlElement = document.documentElement;
+
+        // On page load or when changing themes, best to add inline in `head` to avoid FOUC
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            htmlElement.classList.add('dark');
+            themeIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9 9 0 008.354-5.646z" />`; // Moon icon
+        } else {
+            htmlElement.classList.remove('dark');
+            themeIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />`; // Sun icon
+        }
+
+        themeToggle.addEventListener('click', () => {
+            if (htmlElement.classList.contains('dark')) {
+                htmlElement.classList.remove('dark');
+                localStorage.theme = 'light';
+                themeIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />`; // Sun icon
+            } else {
+                htmlElement.classList.add('dark');
+                localStorage.theme = 'dark';
+                themeIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9 9 0 008.354-5.646z" />`; // Moon icon
+            }
+        });
+
+        // Modals functionality
+        const createAccountModal = document.getElementById('createAccountModal');
+        const signInModal = document.getElementById('signInModal');
+        const profileModal = document.getElementById('profileModal');
+        const authSection = document.getElementById('auth-section');
+        const profileSection = document.getElementById('profile-section');
+        const signInLink = document.getElementById('sign-in-link');
+        const dropdown = document.getElementById('dropdown');
+        const profilePic = document.getElementById('profile-pic');
+        const profileModalPic = document.getElementById('profileModalPic');
+        const profilePicInput = document.getElementById('profilePicInput');
+        const profilePicButtons = document.getElementById('profilePicButtons');
+        const profileForm = document.getElementById('profileForm');
+        const streakLogo = document.getElementById('streak-logo');
+        const streakPopup = document.getElementById('streak-popup');
+        const tryLink = document.getElementById('try-link');
+
+        let loggedInUser = null; // This will store user data after successful login
+
+        function showCreateAccountModal() {
+            createAccountModal.classList.remove('hidden');
+        }
+
+        function hideCreateAccountModal() {
+            createAccountModal.classList.add('hidden');
+            clearFormErrors('createAccountForm');
+        }
+
+        function showSignInModal(event) {
+            event.preventDefault(); // Prevent default link behavior
+            signInModal.classList.remove('hidden');
+        }
+
+        function hideSignInModal() {
+            signInModal.classList.add('hidden');
+            clearFormErrors('signInForm');
+        }
+
+        function showProfileModal() {
+            dropdown.classList.add('hidden'); // Hide dropdown when profile modal opens
+            profileModal.classList.remove('hidden');
+            displayProfileData();
+        }
+
+        function hideProfileModal() {
+            profileModal.classList.add('hidden');
+            clearFormErrors('profileForm');
+        }
+
+        function showSignInModalAndHideCreate(event) {
+            event.preventDefault();
+            hideCreateAccountModal();
+            showSignInModal(event);
+        }
+
+        function showCreateAccountModalAndHideSignIn(event) {
+            event.preventDefault();
+            hideSignInModal();
+            showCreateAccountModal();
+        }
+
+        function toggleDropdown() {
+            dropdown.classList.toggle('hidden');
+        }
+
+        // Close dropdown if clicked outside
+        window.addEventListener('click', function(event) {
+            if (!profileSection.contains(event.target) && !dropdown.classList.contains('hidden')) {
+                dropdown.classList.add('hidden');
+            }
+        });
+
+        // Form validation and submission (client-side simplified)
+        document.getElementById('createAccountForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            let isValid = true;
+            clearFormErrors('createAccountForm');
+
+            const username = document.getElementById('username').value.trim();
+            const createEmail = document.getElementById('createEmail').value.trim();
+            const createPassword = document.getElementById('createPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            if (username === '') {
+                displayError('usernameError', 'Username is required.');
+                isValid = false;
+            }
+            if (!isValidEmail(createEmail)) {
+                displayError('createEmailError', 'A valid email is required.');
+                isValid = false;
+            }
+            if (!isValidPassword(createPassword)) {
+                displayError('createPasswordError', 'Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character (!@#$%^&*).');
+                isValid = false;
+            }
+            if (createPassword !== confirmPassword) {
+                displayError('confirmPasswordError', 'Passwords do not match.');
+                isValid = false;
+            }
+
+            if (isValid) {
+                // Simulate successful account creation and login
+                loggedInUser = {
+                    username: username,
+                    email: createEmail,
+                    profilePicture: '', // No picture by default
+                    // In a real app, you'd get a user ID/token from the backend
+                };
+                localStorage.setItem('loggedInUser', JSON.stringify(loggedInUser));
+                updateAuthUI();
+                hideCreateAccountModal();
+                alert('Account created successfully! Welcome, ' + username + '!');
+                updateStreak(); // Update streak on successful sign-up
+            }
+        });
+
+        document.getElementById('signInForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            let isValid = true;
+            clearFormErrors('signInForm');
+
+            const signInEmail = document.getElementById('signInEmail').value.trim();
+            const signInPassword = document.getElementById('signInPassword').value;
+
+            if (!isValidEmail(signInEmail)) {
+                displayError('signInEmailError', 'Please enter your email.');
+                isValid = false;
+            }
+            if (signInPassword === '') {
+                displayError('signInPasswordError', 'Please enter your password.');
+                isValid = false;
+            }
+
+            if (isValid) {
+                // Simulate successful sign-in
+                loggedInUser = {
+                    username: "DemoUser", // Replace with actual username from backend
+                    email: signInEmail,
+                    profilePicture: localStorage.getItem('userProfilePicture') || '', // Load saved picture
+                    // In a real app, you'd verify credentials with backend
+                };
+                localStorage.setItem('loggedInUser', JSON.stringify(loggedInUser));
+                updateAuthUI();
+                hideSignInModal();
+                alert('Welcome back, ' + loggedInUser.username + '!');
+                updateStreak(); // Update streak on successful sign-in
+            }
+        });
+
+        profileForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+            if (loggedInUser) {
+                loggedInUser.username = document.getElementById('profileUsername').value.trim();
+                localStorage.setItem('loggedInUser', JSON.stringify(loggedInUser));
+                alert('Profile updated successfully!');
+                updateAuthUI(); // Refresh UI after saving changes
+                hideProfileModal();
+            }
+        });
+
+        function displayError(elementId, message) {
+            const errorElement = document.getElementById(elementId);
+            errorElement.textContent = message;
+            errorElement.style.display = 'block';
+        }
+
+        function clearFormErrors(formId) {
+            const errorElements = document.querySelectorAll(`#${formId} .error-message`);
+            errorElements.forEach(el => {
+                el.textContent = '';
+                el.style.display = 'none';
+            });
+        }
+
+        function isValidEmail(email) {
+            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+        }
+
+        function isValidPassword(password) {
+            // At least 8 characters, one uppercase, one lowercase, one number, one special character
+            const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+={}\[\]|\\:;"'<>,.?/~`-])[^ ]{8,}$/;
+            return passwordRegex.test(password);
+        }
+
+        // Social Sign-in (Placeholders)
+        function signInWithGoogle() { alert('Sign in with Google - Feature coming soon!'); }
+        function signInWithFacebook() { alert('Sign in with Facebook - Feature coming soon!'); }
+        function signInWithGithub() { alert('Sign in with GitHub - Feature coming soon!'); }
+
+        function signOut() {
+            loggedInUser = null;
+            localStorage.removeItem('loggedInUser');
+            localStorage.removeItem('userProfilePicture'); // Clear profile picture on sign out
+            localStorage.removeItem('lastLoginDate_streak'); // Clear streak data
+            localStorage.removeItem('lastLoginDate_streak_count'); // Clear streak data
+            updateAuthUI();
+            dropdown.classList.add('hidden');
+            alert('You have been signed out.');
+        }
+
+        function updateAuthUI() {
+            if (loggedInUser) {
+                authSection.classList.add('hidden');
+                profileSection.classList.remove('hidden');
+                
+                // Update profile picture in header
+                if (loggedInUser.profilePicture) {
+                    profilePic.src = loggedInUser.profilePicture;
+                    profilePic.classList.remove('default-profile-pic');
+                } else {
+                    profilePic.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234b5563' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' class='feather feather-user'%3E%3Cpath d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'%3E%3C/path%3E%3Ccircle cx='12' cy='7' r='4'%3E%3C/circle%3E%3C/svg%3E";
+                    profilePic.classList.add('default-profile-pic');
+                }
+
+                // Update streak visibility and info
+                streakLogo.classList.remove('hidden');
+                updateStreakDisplay();
+
+                // Update "Try LearnPath Now" to "View Progress" for logged-in users
+                tryLink.textContent = "View Progress";
+                tryLink.onclick = viewProgress;
+
+            } else {
+                authSection.classList.remove('hidden');
+                profileSection.classList.add('hidden');
+                streakLogo.classList.add('hidden');
+
+                // Reset "Try LearnPath Now" for logged-out users
+                tryLink.textContent = "Try LearnPath Now";
+                tryLink.onclick = function() {
+                    document.getElementById('try').scrollIntoView({ behavior: 'smooth' });
+                };
+            }
+        }
+
+        function displayProfileData() {
+            if (loggedInUser) {
+                document.getElementById('profileUsername').value = loggedInUser.username;
+                document.getElementById('profileEmail').value = loggedInUser.email;
+                
+                // Set profile picture in modal
+                if (loggedInUser.profilePicture) {
+                    profileModalPic.src = loggedInUser.profilePicture;
+                    profileModalPic.classList.remove('default-profile-pic');
+                } else {
+                    profileModalPic.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234b5563' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' class='feather feather-user'%3E%3Cpath d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'%3E%3C/path%3E%3Ccircle cx='12' cy='7' r='4'%3E%3C/circle%3E%3C/svg%3E";
+                    profileModalPic.classList.add('default-profile-pic');
+                }
+
+                // Manage profile picture buttons
+                profilePicButtons.innerHTML = ''; // Clear existing buttons
+                if (loggedInUser.profilePicture) {
+                    const changeBtn = document.createElement('button');
+                    changeBtn.type = 'button';
+                    changeBtn.className = 'btn-primary text-white px-4 py-2 rounded-md font-semibold shadow-md hover:shadow-lg w-full';
+                    changeBtn.textContent = 'Change Pic';
+                    changeBtn.onclick = () => profilePicInput.click();
+                    profilePicButtons.appendChild(changeBtn);
+
+                    const removeBtn = document.createElement('button');
+                    removeBtn.type = 'button';
+                    removeBtn.className = 'cancel-btn px-4 py-2 rounded-md font-semibold shadow-md hover:shadow-lg w-full';
+                    removeBtn.textContent = 'Remove Pic';
+                    removeBtn.onclick = removeProfilePicture;
+                    profilePicButtons.appendChild(removeBtn);
+                } else {
+                    const uploadBtn = document.createElement('button');
+                    uploadBtn.type = 'button';
+                    uploadBtn.className = 'btn-primary text-white px-4 py-2 rounded-md font-semibold shadow-md hover:shadow-lg w-full';
+                    uploadBtn.textContent = 'Upload Pic';
+                    uploadBtn.onclick = () => profilePicInput.click();
+                    profilePicButtons.appendChild(uploadBtn);
+                }
+
+                // Clear password fields on modal open
+                document.getElementById('currentPassword').value = '';
+                document.getElementById('newPassword').value = '';
+                document.getElementById('confirmNewPassword').value = '';
+                clearFormErrors('profileForm'); // Clear password-related errors
+            }
+        }
+
+        function handleProfilePicUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const imgBase64 = e.target.result;
+                    if (loggedInUser) {
+                        loggedInUser.profilePicture = imgBase64;
+                        localStorage.setItem('loggedInUser', JSON.stringify(loggedInUser));
+                        localStorage.setItem('userProfilePicture', imgBase64); // Also save separately for easier access
+                        displayProfileData(); // Refresh modal display
+                        updateAuthUI(); // Refresh header display
+                        alert('Profile picture updated!');
+                    }
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function removeProfilePicture() {
+            if (loggedInUser) {
+                loggedInUser.profilePicture = '';
+                localStorage.setItem('loggedInUser', JSON.stringify(loggedInUser));
+                localStorage.removeItem('userProfilePicture');
+                displayProfileData(); // Refresh modal display
+                updateAuthUI(); // Refresh header display
+                alert('Profile picture removed!');
+            }
+        }
+
+        function updatePassword() {
+            let isValid = true;
+            clearFormErrors('profileForm'); // Clear existing errors
+
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmNewPassword = document.getElementById('confirmNewPassword').value;
+
+            // In a real application, you'd send currentPassword to the backend for verification
+            // For this client-side demo, we'll just check if it's not empty.
+            if (currentPassword === '') {
+                displayError('currentPasswordError', 'Current password is required.');
+                isValid = false;
+            }
+
+            if (!isValidPassword(newPassword)) {
+                displayError('newPasswordError', 'Password must be at least 8 characters long and include a number and a special character.');
+                isValid = false;
+            }
+            if (newPassword !== confirmNewPassword) {
+                displayError('confirmNewPasswordError', 'New passwords do not match.');
+                isValid = false;
+            }
+
+            if (isValid) {
+                // Simulate password update
+                alert('Password updated successfully!');
+                // In a real app, you would send newPassword to the backend to hash and save.
+                // Clear fields after successful update
+                document.getElementById('currentPassword').value = '';
+                document.getElementById('newPassword').value = '';
+                document.getElementById('confirmNewPassword').value = '';
+                hideProfileModal(); // Close modal after successful update
+            }
+        }
+
+        function viewProgress() {
+            alert('Viewing progress - Feature coming soon!');
+        }
+
+        // FAQ Toggle
+        function toggleFaq(id) {
+            const answer = document.getElementById(id + '-answer');
+            const toggle = document.getElementById(id + '-toggle');
+            answer.classList.toggle('open');
+            toggle.classList.toggle('open');
+        }
+
+        // Initialize particles on hero section
+        function initParticles() {
+            const particlesContainer = document.querySelector('.particles');
+            const numParticles = 50; // You can adjust this number
+
+            for (let i = 0; i < numParticles; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                particle.style.left = `${Math.random() * 100}%`;
+                particle.style.top = `${Math.random() * 100}%`; // Distribute vertically
+                particle.style.animationDelay = `${Math.random() * 15}s`;
+                particle.style.transform = `scale(${0.5 + Math.random()})`;
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        // Scroll animations from test (2).html
+        function initScrollAnimations() {
+            const observerOptions = {
+                root: null,
+                rootMargin: '0px',
+                threshold: 0.1
+            };
+
+            const observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('animate');
+                        // No unobserve for hero section to keep animation
+                        if (!entry.target.classList.contains('hero-section')) {
+                            observer.unobserve(entry.target);
+                        }
+                    }
+                });
+            }, observerOptions);
+
+            document.querySelectorAll('.fade-in-up, .animate-fade-in, .feature-card, .testimonial-card').forEach(element => {
+                observer.observe(element);
+            });
+        }
+
+        // Streak functionality
+        function updateStreak() {
+            const streakKey = 'lastLoginDate_streak';
+            let lastLogin = localStorage.getItem(streakKey) || '1970-01-01'; // Default to a very old date
+            const today = new Date().toISOString().split('T')[0]; // UTC, adjust for IST if needed
+            let streak = parseInt(localStorage.getItem(`${streakKey}_count`) || '0', 10);
+
+            if (today > lastLogin) {
+                const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+                if (lastLogin === yesterday) {
+                    streak++;
+                } else if (lastLogin !== today) {
+                    streak = 1;
+                }
+                localStorage.setItem(streakKey, today);
+                localStorage.setItem(`${streakKey}_count`, streak);
+            }
+            updateStreakDisplay();
+        }
+
+        function updateStreakDisplay() {
+            const streakKey = 'lastLoginDate_streak';
+            let streak = parseInt(localStorage.getItem(`${streakKey}_count`) || '0', 10);
+            const streakLogo = document.getElementById('streak-logo');
+            const streakPopup = document.getElementById('streak-popup');
+            if (streakLogo && streakPopup) {
+                streakLogo.firstChild.textContent = `🔥${streak}`;
+                streakPopup.textContent = `Login Streak: ${streak} day${streak !== 1 ? 's' : ''}`;
+                console.log('Streak Updated - Value:', streak);
+            }
+        }
+
+        // Initial calls on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
+            updateAuthUI();
+            initParticles();
+            initScrollAnimations();
+            updateStreak(); // Initial streak check on page load
+        });
+
+        function generatePath() {
+            const courseName = document.getElementById('course-input').value.trim();
+            if (!courseName) {
+                alert('Please enter a course name.');
+                return;
+            }
+            alert(`Generating path for ${courseName}! (Feature placeholder)`);
+            document.getElementById('path-message').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
